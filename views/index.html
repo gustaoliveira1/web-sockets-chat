@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <title>Chat</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+
+    <main>
+      <ul id="messages-container"></ul>
+    </main>
+
+    <footer>
+      <form>
+        <input id="message-input" type="text" name="message" placeholder="Mesagem" autocomplete="off">
+        <button id="send-message-button" type="submit">Enviar</button>
+      </form>
+    </footer>
+
+  </body>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    const messagesContainer = document.querySelector('#messages-container');
+    const messageInput = document.querySelector('#message-input');
+    const sendMessageBtn = document.querySelector('#send-message-button');
+    const sendMessageForm = document.querySelector('form');
+
+
+    sendMessageForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      if (messageInput.value) {
+        const message = {
+          author: socket.id,
+          content: messageInput.value,
+        }
+
+        socket.emit('message', JSON.stringify(message));
+      }
+
+      messageInput.focus();
+      messageInput.value = '';
+    });
+
+
+    socket.on('message', (messageContext) => {
+      const msg = JSON.parse(messageContext);
+
+      const message = document.createElement('li');
+      message.setAttribute('class', 'message');
+
+      messageAuthor = document.createElement('span');
+      messageAuthor.textContent = msg.author;
+      message.appendChild(messageAuthor);
+
+      messageTextContent = document.createElement('p');
+      messageTextContent.textContent = msg.content;
+      message.appendChild(messageTextContent);
+
+      messagesContainer.appendChild(message);
+    });
+  </script>
+
+  <style>
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    main {
+      padding: 2rem;
+    }
+
+    #messages-container, form {
+      display: flex;
+      gap: 1rem;
+    }
+
+    #messages-container {
+      flex-direction: column;
+    }
+
+    #message-input, .message {
+      padding: 1rem;
+    }
+    
+    .message {
+      list-style: none;
+      box-shadow: 0px 0px 2px 3px #00000011;
+    }
+
+    .message > span {
+      font-size: .75rem;
+      font-weight: bold;
+      color: blueviolet;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      z-index: 100;
+    }
+
+    footer, footer > form, #message-input {
+      width: 100%;
+    }
+
+    form {
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: .5rem;
+      height: 4rem;
+    }
+
+    #message-input, #send-message-button {
+      border-radius: 1rem;
+      border: none;
+      outline: none;
+      min-height: 100%;
+      max-height: 100%;
+      box-shadow: 0px 0px 2px 5px #00000011;
+    }
+
+    #message-input {
+      font-size: 1em;
+    }
+
+    #send-message-button, #message-input::placeholder {
+      font-weight: bold;
+    }
+
+    #send-message-button {
+      padding: 1rem 1.5rem;
+      background-color: blueviolet;
+      color: white;
+      font-weight: bold;
+    }
+
+    #send-message-button:active {
+      background-color: blue;
+    }
+  </style>
+</html>
